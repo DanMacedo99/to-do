@@ -80,5 +80,8 @@
       "eslint --fix",
       "jest --findRelatedTests --bail"
     ]
+  },
+  "msw": {
+    "workerDirectory": "public"
   }
 }

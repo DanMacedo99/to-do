@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import cuid from 'cuid'
 import { z } from 'zod'
@@ -8,12 +8,18 @@ const schema = z.object({
   name: z.string(),
 })
 
-type Task = z.infer<typeof schema>
+export type Task = z.infer<typeof schema>
 
 export const App: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([])
   const [error, setError] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    fetch('/tasks')
+      .then((res) => res.json())
+      .then(console.log)
+  }, [])
 
   return (
     <div>
