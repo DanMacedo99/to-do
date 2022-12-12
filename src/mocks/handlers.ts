@@ -12,12 +12,9 @@ export const handlers = [
     // Adiciona tarefa
     const data = await req.json<Task>()
 
-    tasks.push({
-      id: data.id,
-      name: data.name,
-    })
+    tasks.push(data)
 
-    return res(ctx.status(201), ctx.json(tasks))
+    return res(ctx.status(201), ctx.json(data))
   }),
   rest.put('/tasks', async (req, res, ctx) => {
     // Atualizar tarefa
