@@ -81,24 +81,83 @@ export const App: React.FC = () => {
       <ul>
         {tasks?.map((task) => (
           <li key={task.id}>
-            {task.name}{' '}
-            <button
-              onClick={() => {
-                fetch('/tasks', {
-                  method: 'DELETE',
-                  body: JSON.stringify({ id: task.id }),
-                })
-                  .then(() => {
-                    fetchTasks()
-                  })
-                  .catch((e) => setError(e.message))
-              }}
-            >
-              -
-            </button>
+            <TaskItem
+              id={task.id}
+              name={task.name}
+              onError={setError}
+              onSuccess={fetchTasks}
+            />
           </li>
         ))}
       </ul>
     </div>
+  )
+}
+
+type TaskItemProps = {
+  onSuccess: () => void
+  onError: (message: string) => void
+} & Task
+
+function TaskItem({ id, name, onError, onSuccess }: TaskItemProps) {
+  const [readOnly, setReadOnly] = useState(true)
+  const cancelRef = useRef<HTMLButtonElement>(null)
+
+  return (
+    <form
+      onSubmit={(event) => {
+        event.preventDefault()
+        const formData = new FormData(event.currentTarget)
+
+        const updatedTask = { id, name: formData.get('task')?.toString() }
+
+        // Serializando o formData
+        // console.log(Object.fromEntries(formData))
+
+        fetch('/tasks', {
+          method: 'PUT',
+          body: JSON.stringify(updatedTask),
+        })
+          .then(() => {
+            onSuccess()
+            cancelRef?.current?.click()
+          })
+          .catch((e) => onError(e.message))
+      }}
+    >
+      <input
+        name="task"
+        id="task"
+        defaultValue={name}
+        readOnly={readOnly}
+        required
+      />
+
+      <button
+        type="button"
+        onClick={() => {
+          fetch('/tasks', {
+            method: 'DELETE',
+            body: JSON.stringify({ id }),
+          })
+            .then(() => {
+              onSuccess()
+            })
+            .catch((e) => onError(e.message))
+        }}
+      >
+        -
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          setReadOnly(!readOnly)
+        }}
+        ref={cancelRef}
+      >
+        {readOnly ? 'Editar' : 'Cancelar'}
+      </button>
+      {!readOnly ? <button type="submit">Salvar</button> : null}
+    </form>
   )
 }
