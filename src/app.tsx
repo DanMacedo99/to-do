@@ -10,20 +10,32 @@ const schema = z.object({
 
 export type Task = z.infer<typeof schema>
 
+const getTasks = (
+  onSuccess: (data: Task[]) => void,
+  onError: (error: Error) => void,
+) =>
+  fetch('/tasks')
+    .then((res) => res.json())
+    .then((res) => {
+      onSuccess?.(res)
+    })
+    .catch((error) => {
+      onError(error)
+    })
+
 export const App: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([])
   const [error, setError] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
+  const fetchTasks = () =>
+    getTasks(
+      (t) => setTasks(t),
+      (error) => setError(error.message),
+    )
+
   useEffect(() => {
-    fetch('/tasks')
-      .then((res) => res.json())
-      .then((res) => {
-        setTasks(res)
-      })
-      .catch((error) => {
-        setError(error.message)
-      })
+    fetchTasks()
   }, [])
 
   return (
@@ -68,7 +80,23 @@ export const App: React.FC = () => {
 
       <ul>
         {tasks?.map((task) => (
-          <li key={task.id}>{task.name}</li>
+          <li key={task.id}>
+            {task.name}{' '}
+            <button
+              onClick={() => {
+                fetch('/tasks', {
+                  method: 'DELETE',
+                  body: JSON.stringify({ id: task.id }),
+                })
+                  .then(() => {
+                    fetchTasks()
+                  })
+                  .catch((e) => setError(e.message))
+              }}
+            >
+              -
+            </button>
+          </li>
         ))}
       </ul>
     </div>
