@@ -18,7 +18,12 @@ export const App: React.FC = () => {
   useEffect(() => {
     fetch('/tasks')
       .then((res) => res.json())
-      .then(console.log)
+      .then((res) => {
+        setTasks(res)
+      })
+      .catch((error) => {
+        setError(error.message)
+      })
   }, [])
 
   return (
@@ -40,7 +45,15 @@ export const App: React.FC = () => {
             return
           }
 
-          setTasks((currentState) => [...currentState, newTask])
+          fetch('/tasks', { method: 'POST', body: JSON.stringify(newTask) })
+            .then((res) => res.json())
+            .then((res) => {
+              console.log(res)
+              setTasks((currentState) => [...currentState, res])
+            })
+            .catch((error) => {
+              setError(error.message)
+            })
 
           if (inputRef.current?.value) {
             inputRef.current.value = ''

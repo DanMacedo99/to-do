@@ -1,7 +1,9 @@
 import { Task } from '~/app'
 import { rest } from 'msw'
 
-let tasks: Task[] = []
+let tasks: Task[] = [
+  { id: 'clbl5nx0b00002e644yc596az', name: 'Primeira tarefa' },
+]
 
 export const handlers = [
   rest.get('/tasks', (_req, res, ctx) => {
