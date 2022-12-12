@@ -1,29 +1,40 @@
 import { useRef, useState } from 'react'
 
 import cuid from 'cuid'
+import { z } from 'zod'
 
-type Task = {
-  id: string
-  name: string
-}
+const schema = z.object({
+  id: z.string().cuid(),
+  name: z.string(),
+})
+
+type Task = z.infer<typeof schema>
 
 export const App: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([])
+  const [error, setError] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
   return (
     <div>
+      {error ? <p>{error}</p> : null}
+
       <form
         onSubmit={(e) => {
           e.preventDefault()
           const formData = new FormData(e.currentTarget)
-          setTasks((currentState) => [
-            ...currentState,
-            {
-              id: cuid(),
-              name: formData.get('task')?.toString() || '',
-            },
-          ])
+
+          const newTask = {
+            id: cuid(),
+            name: formData.get('task')?.toString() || '',
+          }
+
+          if (!schema.safeParse(newTask).success) {
+            setError('Ocorreu um erro na validação do formulário')
+            return
+          }
+
+          setTasks((currentState) => [...currentState, newTask])
 
           if (inputRef.current?.value) {
             inputRef.current.value = ''
