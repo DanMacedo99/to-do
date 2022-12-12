@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+
+import cuid from 'cuid'
 
 type Task = {
   id: string
@@ -7,6 +9,7 @@ type Task = {
 
 export const App: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([])
+  const inputRef = useRef<HTMLInputElement>(null)
 
   return (
     <div>
@@ -17,15 +20,19 @@ export const App: React.FC = () => {
           setTasks((currentState) => [
             ...currentState,
             {
-              id: 'asdfafq',
-              name: formData.get('tasks')?.toString() || '',
+              id: cuid(),
+              name: formData.get('task')?.toString() || '',
             },
           ])
+
+          if (inputRef.current?.value) {
+            inputRef.current.value = ''
+          }
         }}
       >
         <label htmlFor="task">Adicionar tarefa:</label>
         <br />
-        <input name="task" id="task" />
+        <input name="task" id="task" ref={inputRef} />
         <button type="submit">+</button>
       </form>
 
